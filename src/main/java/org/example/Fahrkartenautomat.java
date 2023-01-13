@@ -4,64 +4,113 @@ import java.util.Locale;
 import java.util.Scanner;
 
 class Fahrkartenautomat {
+
+    public static double[] ticketPreise;
+    public static String[] ticketArten;
+    public static double zuZahlenderBetrag;
+    public static double eingezahlterGesamtbetrag;
+    public static double eingeworfeneMuenze;
+    public static double rueckgabebetrag;
+    public static double nochZuZahlen;
+    public static double ticketPreis;
+    public static int anzahlTickets;
+    public static int ticketArt;
+    public static Scanner tastatur;
     public static void main(String[] args) {
 
-        Scanner tastatur = new Scanner(System.in).useLocale(Locale.US);
+        fahrkartenArtenKonfigurieren();
 
-        double zuZahlenderBetrag;
-        double eingezahlterGesamtbetrag;
-        double eingeworfeneMuenze;
-        double rueckgabebetrag;
-        double nochZuZahlen;
-        double ticketPreis;
-        int anzahlTickets;
-        int ticketArt;
-        //1
-
-
-        // Geldbetrag eingeben
-        /*System.out.print("Ticketpreis (Euro): ");
-        ticketPreis = tastatur.nextDouble();
-
-        if (ticketPreis <= 0) { // neu
-            System.out.println("Fehlerhafte Eingabe"); // neu
-            ticketPreis = 1; // neu
-        }*/ // neu
+        tastatur = new Scanner(System.in).useLocale(Locale.US);
 
 
         // Auswahl der Ticketart (4.3)
-        System.out.print("""
-                Wählen Sie ihre Wunschfahrkarte für Berlin AB aus:
-                  Kurzstrecke AB [2,00 EUR] (1)
-                  Einzelfahrschein AB [3,00 EUR] (2)
-                  Tageskarte AB [8,80 EUR] (3)
-                  4-Fahrten-Karte AB [9,40 EUR] (4)
-                  Bezahlen (9)
-                """);
+        displayTicketArten();
 
+
+        fahrkartenbestellungErfassen();
+
+
+        // Geldeinwurf
+        geldeinwurf();
+
+
+        // Fahrscheinausgabe
+        System.out.println("\nFahrschein wird ausgegeben");
+
+
+        fakeLoadingSequence();
+
+
+        // Rückgeldberechnung und -ausgabe
+        rueckgeldAusgabe();
+
+
+        System.out.println("""
+                Vergessen Sie nicht, den Fahrschein
+                vor Fahrtantritt entwerten zu lassen!
+                Wir wünschen Ihnen eine gute Fahrt.""");
+
+        tastatur.close();
+    }
+
+    private static void displayTicketArten() {
+        System.out.println("Wählen Sie ihre Wunschfahrkarte für Berlin AB aus:");
+
+        for (int i = 0; i < ticketArten.length; i++) {
+            System.out.println("  " + ticketArten[i] + " [" + ticketPreise[i] + "] (" + (i + 1) + ")");
+        }
+        System.out.println("Bezahlen (14)");
+    }
+
+    private static void fahrkartenArtenKonfigurieren() {
+        ticketPreise = new double[13];
+        ticketPreise[0] = 3.00;
+        ticketPreise[1] = 3.50;
+        ticketPreise[2] = 3.80;
+        ticketPreise[3] = 2.00;
+        ticketPreise[4] = 8.60;
+        ticketPreise[5] = 9.20;
+        ticketPreise[6] = 10.00;
+        ticketPreise[7] = 9.40;
+        ticketPreise[8] = 12.60;
+        ticketPreise[9] = 13.80;
+        ticketPreise[10] = 25.50;
+        ticketPreise[11] = 26.00;
+        ticketPreise[12] = 26.50;
+
+        ticketArten = new String[13];
+        ticketArten[0] = "Einzelfahrschein AB";
+        ticketArten[1] = "Einzelfahrschein BC";
+        ticketArten[2] = "Einzelfahrschein ABC";
+        ticketArten[3] = "Kurzstrecke AB";
+        ticketArten[4] = "Tageskarte AB";
+        ticketArten[5] = "Tageskarte BC";
+        ticketArten[6] = "Tageskarte ABC";
+        ticketArten[7] = "4-Fahrten-Karte AB";
+        ticketArten[8] = "4-Fahrten-Karte BC";
+        ticketArten[9] = "4-Fahrten-Karte ABC";
+        ticketArten[10] = "Kleingruppen-Tageskarte AB";
+        ticketArten[11] = "Kleingruppen-Tageskarte BC";
+        ticketArten[12] = "Kleingruppen-Tageskarte ABC";
+
+    }
+
+    private static void fahrkartenbestellungErfassen() {
         zuZahlenderBetrag = 0;
         ticketArt = 0;
 
-        while (ticketArt != 9) {                                                                                         //4.4
+        while (ticketArt != 14) {                                                                                        //4.4
             System.out.print("Ticketart: ");
             ticketArt = tastatur.nextInt();
-            while ((ticketArt < 1 || ticketArt > 4) && ticketArt != 9) {                                                //4.4 (teilweise)
+            while ((ticketArt < 1 || ticketArt > 13) && ticketArt != 14) {                                                //4.4 (teilweise)
                 System.out.print("Bitte wählen sie eine gültige Ticketart: ");
                 ticketArt = tastatur.nextInt();
             }
 
 
-            switch (ticketArt) {
-                case 1 -> ticketPreis = 2;
-                case 2 -> ticketPreis = 3;
-                case 3 -> ticketPreis = 8.80;
-                case 4 -> ticketPreis = 9.40;
-                default -> ticketPreis = 0;
-            }
-
-
             // Nachfrage nach Ticketanzahl (4.2)
-            if (ticketArt != 9) {                                                                                        //4.4
+            if (ticketArt != 14) {
+                ticketPreis = ticketPreise[ticketArt - 1];
                 System.out.print("Anzahl der Tickets (1 bis 10): ");
                 anzahlTickets = tastatur.nextInt();
                 while (anzahlTickets < 1 || anzahlTickets > 10) {
@@ -72,10 +121,10 @@ class Fahrkartenautomat {
             }
             System.out.println("Zwischensumme: " + zuZahlenderBetrag + "€");
         }
+    }
 
-        // Geldeinwurf
+    private static void geldeinwurf() {
         eingezahlterGesamtbetrag = 0.0;
-        nochZuZahlen = 0.0;
         while (eingezahlterGesamtbetrag < zuZahlenderBetrag ) {
             nochZuZahlen = zuZahlenderBetrag - eingezahlterGesamtbetrag;
             System.out.printf("Noch zu zahlen: %4.2f Euro\n", nochZuZahlen);
@@ -98,10 +147,10 @@ class Fahrkartenautomat {
             }
             eingezahlterGesamtbetrag = eingezahlterGesamtbetrag + eingeworfeneMuenze;
         }
+    }
 
+    private static void fakeLoadingSequence() {
 
-        // Fahrscheinausgabe
-        System.out.println("\nFahrschein wird ausgegeben");
         for (int i = 0; i < 8; i++) {
             System.out.print("=");
             try {
@@ -111,8 +160,9 @@ class Fahrkartenautomat {
             }
         }
         System.out.println("\n\n");
+    }
 
-        // Rückgeldberechnung und -ausgabe
+    private static void rueckgeldAusgabe() {
         rueckgabebetrag = eingezahlterGesamtbetrag - zuZahlenderBetrag;
         if (rueckgabebetrag > 0.0) {
             System.out.format("Der Rückgabebetrag in Höhe von %4.2f Euro \n", rueckgabebetrag);
@@ -143,13 +193,5 @@ class Fahrkartenautomat {
                 rueckgabebetrag = rueckgabebetrag - 0.05;
             }
         }
-
-        System.out.println("""
-
-                Vergessen Sie nicht, den Fahrschein
-                vor Fahrtantritt entwerten zu lassen!
-                Wir wünschen Ihnen eine gute Fahrt.""");
-
-        tastatur.close();
     }
 }
